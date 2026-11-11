@@ -1,0 +1,7 @@
+cd "C:\Users\gowsh\Music\ClassWork (SEM-5)\gsk\Internship\internship project\Ai inventory management project for internship"
+
+venv\Scripts\activate.bat
+
+pip install -r requirements.txt
+
+http://127.0.0.1:8000

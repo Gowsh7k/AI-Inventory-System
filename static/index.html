@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">
+                Inventory <span style="color:var(--primary)">Pro</span>
+            </h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" required value="admin">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required value="admin123">
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Secure Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>Inventory Pro</h2>
+
+        <ul class="nav-links">
+            <li class="active"><a href="#" onclick="showSection('dashboard', event)">Dashboard</a></li>
+            <li><a href="#" onclick="showSection('inventory', event)">Inventory Items</a></li>
+            <li><a href="#" onclick="showSection('sales-history', event)">Sales History</a></li>
+            <li><a href="#" onclick="showSection('ml-evaluation', event)">ML Evaluation</a></li>
+            <li id="nav-users" style="display: none;">
+                <a href="#" onclick="showSection('users', event)">User Management</a>
+            </li>
+        </ul>
+
+        <div style="margin-top: auto; padding: 2rem;">
+            <button class="btn btn-secondary full-width" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <header>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search by name or SKU...">
+                <select id="category-filter">
+                    <option value="All">All Categories</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Office Supplies">Office Supplies</option>
+                    <option value="Home Goods">Home Goods</option>
+                    <option value="Sports">Sports</option>
+                </select>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+                <button class="btn btn-primary" id="btn-add-item" onclick="openModal('add-modal')">+ Add Item</button>
+            </div>
+        </header>
+
+        <section id="dashboard-section">
+            <div class="summary-cards" id="summary-cards"></div>
+
+            <div class="charts-row">
+                <div class="chart-container" style="flex: 2;">
+                    <h3>Sales Trend Analytics</h3>
+                    <p style="margin-bottom: 1rem; font-size: 0.9rem;">
+                        Select an item from inventory to view sales history.
+                    </p>
+                    <div style="position: relative; height:300px; width:100%">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="flex: 1;">
+                    <h3>Category Distribution</h3>
+                    <div style="position: relative; height:300px; width:100%">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="inventory-section" style="display: none;">
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sales-history-section" style="display: none;">
+            <div class="summary-cards" id="sales-summary-cards" style="margin-bottom: 1.5rem;">
+                <div class="card">
+                    <h4>Total Transactions</h4>
+                    <div class="val" id="sales-total-count">-</div>
+                </div>
+                <div class="card">
+                    <h4>Total Units Sold</h4>
+                    <div class="val" id="sales-total-units">-</div>
+                </div>
+                <div class="card">
+                    <h4>Total Sales Revenue</h4>
+                    <div class="val" id="sales-total-revenue">-</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sale ID</th>
+                            <th>Date & Time</th>
+                            <th>Item Name</th>
+                            <th>Quantity Sold</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-history-body"></tbody>
+                </table>
+                <div class="pagination-bar" id="sales-pagination">
+                    <span id="sales-page-info" style="font-size: 0.9rem; color: var(--text-muted);">Showing 0 records</span>
+                    <div class="pagination-controls">
+                        <button class="btn btn-sm btn-secondary" id="sales-prev-btn" onclick="changeSalesPage(-1)">Previous</button>
+                        <span id="sales-page-num" style="font-size: 0.9rem; font-weight: 500;">Page 1</span>
+                        <button class="btn btn-sm btn-secondary" id="sales-next-btn" onclick="changeSalesPage(1)">Next</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="users-section" style="display: none;">
+            <div class="actions" style="margin-bottom: 1.5rem;">
+                <button class="btn btn-primary" onclick="openModal('add-user-modal')">+ Add User</button>
+            </div>
+
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="ml-evaluation-section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Machine Learning Evaluation</h2>
+                <button class="btn btn-primary" onclick="fetchMLEvaluation()">Refresh Evaluation</button>
+            </div>
+
+            <div class="table-card" style="margin-bottom: 2rem;">
+                <h3 style="padding: 1rem;">Model Performance Comparison</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead id="ml-comparison-head"></thead>
+                        <tbody id="ml-comparison-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="ml-graphs-grid">
+                <div class="chart-container">
+                    <h3>Model Comparison</h3>
+                    <img data-graph="model_comparison.png"
+                         alt="Model comparison graph" class="ml-graph">
+                </div>
+
+                <div class="chart-container">
+                    <h3>Actual vs Predicted</h3>
+                    <img data-graph="actual_vs_predicted.png"
+                         alt="Actual versus predicted graph" class="ml-graph">
+                </div>
+
+                <div class="chart-container">
+                    <h3>Residual Analysis</h3>
+                    <img data-graph="residual_plot.png"
+                         alt="Residual plot" class="ml-graph">
+                </div>
+
+                <div class="chart-container">
+                    <h3>K-Means Clustering</h3>
+                    <img data-graph="kmeans_clusters.png"
+                         alt="K-Means cluster graph" class="ml-graph">
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-modal')">&times;</span>
+            <h2>Add New Item</h2>
+            <form id="add-form">
+                <div class="form-group"><label>SKU</label><input type="text" id="add-sku" required></div>
+                <div class="form-group"><label>Name</label><input type="text" id="add-name" required></div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="add-category">
+                        <option>Electronics</option>
+                        <option>Clothing</option>
+                        <option>Office Supplies</option>
+                        <option>Home Goods</option>
+                        <option>Sports</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Price (₹)</label><input type="number" step="0.01" id="add-price" required></div>
+                    <div class="form-group"><label>Initial Stock</label><input type="number" min="0" id="add-stock" required></div>
+                    <div class="form-group"><label>Reorder Level</label><input type="number" min="0" id="add-reorder" value="10" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Save Item</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('edit-modal')">&times;</span>
+            <h2>Edit Item</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-group"><label>Name</label><input type="text" id="edit-name" required></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Price (₹)</label><input type="number" step="0.01" id="edit-price" required></div>
+                    <div class="form-group"><label>Reorder Level</label><input type="number" min="0" id="edit-reorder" required></div>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Update Item</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="action-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('action-modal')">&times;</span>
+            <h2 id="action-title">Process</h2>
+            <p id="action-desc" style="margin-bottom: 1rem; font-weight: 500;"></p>
+            <form id="action-form">
+                <input type="hidden" id="action-item-id">
+                <input type="hidden" id="action-type">
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" id="action-quantity" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary full-width" id="action-btn">Confirm</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="ai-modal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="close" onclick="closeModal('ai-modal')">&times;</span>
+            <h2>🤖 AI Insights</h2>
+            <p id="ai-item-name" style="font-weight: 600; margin-bottom: 1.5rem;"></p>
+
+            <div class="card" style="margin-bottom: 1rem; background: #f8fafc;">
+                <h4>Product Segmentation</h4>
+                <div class="val" id="ai-segment" style="color: var(--primary); font-size: 1.5rem;">Loading...</div>
+                <p style="font-size: 0.85rem; margin-top:0.5rem;">Based on K-Means clustering.</p>
+            </div>
+
+            <div class="card" style="background: #f8fafc;">
+                <h4>30-Day Demand Forecast</h4>
+                <div class="val" id="ai-demand" style="font-size: 1.5rem;">Loading...</div>
+                <p style="font-size: 0.85rem; margin-top:0.5rem;">Based on the currently loaded demand model.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('add-user-modal')">&times;</span>
+            <h2>Add New User</h2>
+            <form id="add-user-form">
+                <div class="form-group"><label>Username</label><input type="text" id="add-user-name" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="add-user-password" required></div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="add-user-role">
+                        <option value="staff">Staff</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Create User</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js?v=4"></script>
+</body>
+</html>

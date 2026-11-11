@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Backups & OS files
+*.bak
+.DS_Store
+Thumbs.db
+
+# Environment & IDE
+.env
+.vscode/
+.idea/
