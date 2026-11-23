@@ -1,5 +1,4 @@
 # Inventory Pro 📦
-
 A robust, full-stack Inventory and Sales Management System. 
 Built with **FastAPI**, **SQLite**, and **Vanilla HTML/CSS/JS** with **Chart.js**.
 
@@ -12,7 +11,6 @@ Built with **FastAPI**, **SQLite**, and **Vanilla HTML/CSS/JS** with **Chart.js*
 - **CSV Export**: One-click download of the entire inventory table to CSV.
 
 ## Quick Start
-
 ### 1. Setup Virtual Environment
 ```bash
 python -m venv venv
@@ -22,7 +20,6 @@ python -m venv venv
 venv\Scripts\activate.bat
 # Mac/Linux
 source venv/bin/activate
-
 pip install -r requirements.txt
 ```
 
@@ -37,9 +34,7 @@ The easiest way to start the application is using the Python runner script:
 ```bash
 python run.py
 ```
-
 Open `http://localhost:8000` in your browser to view the dashboard!
-
 ## API Documentation
 Once the server is running, you can access the auto-generated Swagger documentation at:
 - `http://localhost:8000/docs`

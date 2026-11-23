@@ -35,7 +35,7 @@ def generate_mock_data():
     
     print("Generating 100 inventory items...")
     items = []
-    for _ in range(100):
+    for i in range(1, 101):
         sku = fake.unique.bothify(text='ITM-####-???')
         # Simple product name generation since faker.commerce isn't standard in all faker versions
         adjectives = ['Smart', 'Ergonomic', 'Wireless', 'Portable', 'Durable']
@@ -52,8 +52,7 @@ def generate_mock_data():
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (sku, name, category, price, stock_quantity, reorder_level))
         
-        item_id = cursor.lastrowid
-        items.append((item_id, price)) # store actual inserted ID and price for sales simulation
+        items.append((i, price)) # store ID and price for sales simulation
     
     conn.commit()
     
